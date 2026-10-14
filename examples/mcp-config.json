@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "roomview": {
+      "command": "node",
+      "args": ["/absolute/path/to/RoomView/scripts/mcp-server.mjs"],
+      "env": { "ROOMVIEW_URL": "http://127.0.0.1:4317" }
+    }
+  }
+}

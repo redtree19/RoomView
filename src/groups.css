@@ -1,0 +1,8 @@
+.group-members{max-height:180px;overflow:auto;border:1px solid #e2e8dc;border-radius:6px;background:#f5f8ef;padding:5px 10px}
+.group-members>div{font-size:11px;padding:6px 0;border-bottom:1px solid #e6ecdf;overflow-wrap:anywhere}
+.group-members>div:last-child{border:0}
+.selection-outline .handle{cursor:grab}
+.selected-header .selected-swatch:empty{background:#95aba0}
+.shape-vertices{max-height:300px;overflow-y:auto;margin-top:12px}
+.shape-vertices .vertex-row{gap:4px}
+.shape-vertices button{width:22px;min-height:30px;padding:0;flex-shrink:0}

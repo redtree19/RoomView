@@ -1,0 +1,36 @@
+# Generated files and local project data
+node_modules/
+dist/
+data/
+test-results/
+playwright-report/
+coverage/
+*.log
+*.tmp
+*.bak
+
+# Exported room layouts at repository root
+/*.json
+!/package.json
+!/package-lock.json
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.npmrc
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local experiments are not part of this release
+*curve-lab*
+*soft-lab*
+Start-CurveLab.cmd
+src/core/ffd.js
+src/core/soft-shape.js
+tests/ffd.test.mjs
+tests/soft-shape.test.mjs

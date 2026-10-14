@@ -1,0 +1,26 @@
+{
+  "commands": [
+    {
+      "op": "furniture.add",
+      "data": {
+        "id": "ai_reading_desk",
+        "name": "阅读桌",
+        "kind": "table",
+        "x": 320,
+        "y": 250,
+        "width": 120,
+        "depth": 60,
+        "height": 75,
+        "color": "#c6b48f"
+      }
+    },
+    {
+      "op": "measurement.add",
+      "data": {
+        "name": "桌前活动空间",
+        "a": { "x": 320, "y": 280 },
+        "b": { "x": 320, "y": 360 }
+      }
+    }
+  ]
+}

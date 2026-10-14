@@ -41,6 +41,8 @@ npm run test:browser
 
 测试使用独立临时数据目录；API 测试使用端口 `14319`，浏览器测试使用 `14318`。不要同时在这些端口运行多个测试实例。
 
+在线 Demo 的静态构建使用 `npm run build:demo`，输出到 `dist-demo/`；`npm run test:demo` 在端口 `14320` 验证子路径部署、浏览器保存和导入导出。此构建不会请求本机 HTTP API。
+
 ## 环境变量
 
 | 变量 | 默认值 | 用途 |

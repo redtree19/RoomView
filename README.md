@@ -6,6 +6,14 @@
 
 [环境与依赖要求](REQUIREMENTS.md) · [AI 接口说明](docs/AI_API.md) · [MIT 许可证](LICENSE)
 
+## 在线体验
+
+**[打开 RoomView 在线 Demo](https://redtree19.github.io/RoomView/)**，无需安装或登录即可使用 2D / 3D 编辑器。
+
+方案仅保存在当前浏览器中，不上传到项目服务器，也不会与其他访客共享；清理浏览器数据或更换设备后无法自动恢复，请用右上角“导出”保存 JSON，再用“导入”恢复。在线版支持 AI JSON 命令工作台和 `window.roomview`；HTTP API、MCP 和磁盘自动保存需要本地运行。
+
+GitHub Actions 会在 `main` 更新后运行测试、构建并部署到 GitHub Pages，只发布 `dist-demo/` 的静态资源。可本地验证：`npm run build:demo`、`npm run test:demo`。Pages 设置使用 **GitHub Actions** 作为发布来源。
+
 ## 启动
 
 需要 **Node.js 22.12+**、npm 和现代浏览器。3D 需要 WebGL 2。完整环境要求见 [REQUIREMENTS.md](REQUIREMENTS.md)。

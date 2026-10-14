@@ -1,5 +1,6 @@
 import './style.css';
 import './groups.css';
+import './demo.css';
 import { demoScene, emptyScene, validateScene, applyCommands, clone, presets, uid, locate, measurePoints } from './core/model.js';
 import { selectionRoot, expandSelection, selectionBounds } from './core/groups.js';
 import { analyze, distance, round, wallLength, sceneBounds, polygonArea, furnitureLocalPolygon, furniturePolygonPatch } from './core/geometry.js';
@@ -8,7 +9,8 @@ import { Plan2D, escapeHtml as esc } from './plan2d.js';
 import { View3D } from './view3d.js';
 
 let scene=demoScene(),selected=null,analysis=analyze(scene),revision=null,online=false,dirty=false,saving=false,conflicted=false,ready=false,saveTimer,pollTimer,previewFrame;
-let undo=[],redo=[],selectedIds=[];const LOCAL_KEY='roomview.scene.v1';
+const staticDemo=import.meta.env.MODE==='demo';
+let undo=[],redo=[],selectedIds=[];const LOCAL_KEY=staticDemo?`roomview.demo.v1:${location.pathname}`:'roomview.scene.v1';
 const $=selector=>document.querySelector(selector);
 const icons={select:'↖',pan:'✥',room:'▭',polygon:'⬡',wall:'╱',curve:'⌒',measure:'↔'};
 const toolLabels={select:'选择',pan:'平移',room:'矩形房间',polygon:'多边形',wall:'直墙',curve:'曲线墙',measure:'测距'};
@@ -34,6 +36,7 @@ document.querySelector('#app').innerHTML=`
     <div class="side-footer"><span class="status-dot"></span>本地优先 · 无需账号<button id="help-open" aria-label="操作帮助">?</button></div>
   </aside>
   <section class="center-panel">
+    ${staticDemo?'<div class="demo-notice" role="note"><span><b>在线体验</b> · 方案仅保存在此浏览器，清理浏览器数据会丢失，请导出 JSON 备份。</span><a href="https://github.com/redtree19/RoomView" target="_blank" rel="noopener">GitHub ↗</a></div>':''}
     <div class="canvas-toolbar"><div class="tools">${Object.keys(icons).map(t=>`<button data-tool="${t}" class="tool ${t==='select'?'active':''}" title="${toolLabels[t]}" aria-label="${toolLabels[t]}"><span>${icons[t]}</span><small>${toolLabels[t]}</small></button>`).join('')}</div><div class="view-toggle"><button data-view="2d">2D</button><button data-view="split" class="active">双视图</button><button data-view="3d">3D</button></div></div>
     <div class="view-workspace split" id="views">
       <section id="plan-pane" class="view-pane"><div class="view-heading"><span><i class="tiny-square"></i>平面布局 <small>TOP VIEW</small></span><button id="fit-plan" title="居中显示全部内容">适应画布 ⤢</button></div><svg id="plan" aria-label="二维布局画布" tabindex="0"></svg><div class="plan-controls"><button id="zoom-out" aria-label="缩小">−</button><span id="zoom-label">100%</span><button id="zoom-in" aria-label="放大">＋</button><span class="separator"></span><label><input type="checkbox" id="snap" checked/>吸附</label><select id="grid" aria-label="网格间距"><option value="1">1 cm</option><option value="5">5 cm</option><option value="10" selected>10 cm</option><option value="20">20 cm</option></select><label><input type="checkbox" id="dimensions" checked/>尺寸</label></div><div class="orientation">N <span>↑</span></div></section>
@@ -85,6 +88,7 @@ async function poll(){
 async function init(){
   let backup;
   try{const raw=localStorage.getItem(LOCAL_KEY);if(raw){backup=JSON.parse(raw);scene=validateScene(backup.scene||backup);dirty=Boolean(backup.dirty);revision=backup.baseRevision??null;}}catch{toast('浏览器备份不可用，已加载示例');}
+  if(staticDemo){ready=true;renderAll();plan.fit();view3d.fit();return;}
   try{const res=await fetch('/api/project');if(res.ok){const data=await res.json();if(data.storageError)toast(data.storageError);else{online=true;if(dirty&&JSON.stringify(scene)!==JSON.stringify(data.scene)){conflicted=revision!==data.revision;if(conflicted)toast('发现未同步的浏览器备份，点击顶部同步冲突处理');}else{scene=validateScene(data.scene);dirty=false;}revision=data.revision;}}}catch{}
   ready=true;renderAll();plan.fit();view3d.fit();if(dirty&&!conflicted)scheduleSave();pollTimer=setInterval(poll,1700);
 }
@@ -149,6 +153,11 @@ function aiModal(){
   const example={commands:[{op:'furniture.add',data:{id:'ai_desk',name:'AI 添加的书桌',kind:'table',x:300,y:220,width:140,depth:70,height:75,color:'#bda987'}}]};
   modal('AI 工作台',`<div class="ai-intro"><span class="api-tag">LOCAL API</span><p>AI 可读取完整场景，并通过原子命令批量操作。每个对象有稳定 ID，修改会同步到画布。</p></div><div class="api-links"><button id="copy-scene">复制当前场景</button><button id="copy-schema">复制命令 Schema</button><a href="/api/tools" target="_blank" rel="noopener">查看工具定义 ↗</a></div><label class="field"><span>JSON 命令批次</span><textarea id="ai-commands" spellcheck="false" rows="12">${esc(JSON.stringify(example,null,2))}</textarea></label><div class="button-pair"><button id="ai-validate">验证 / 预览</button><button id="ai-execute" class="primary">执行命令</button></div><pre id="ai-result" class="api-result">支持新增、修改、删除、复制、整场景导入，以及曲线墙和门窗属性。</pre><details><summary>HTTP 接入方式</summary><pre>GET  /api/project\nGET  /api/analysis\nGET  /api/schema\nGET  /api/tools\nPOST /api/commands\nGET  /api/measure?ax=0&amp;ay=0&amp;bx=100&amp;by=100</pre><p class="muted">写入需 Content-Type: application/json 和 expectedRevision。服务仅监听 127.0.0.1。静态部署下可使用 window.roomview 接口。</p></details>`);
   $('#copy-scene').onclick=()=>copy(JSON.stringify(scene,null,2));$('#copy-schema').onclick=()=>copy(JSON.stringify(commandSchema,null,2));
+  if(staticDemo){
+    $('.api-tag').textContent='浏览器 AI 接口';
+    const link=$('.api-links a'),button=document.createElement('button');button.textContent='查看工具定义';button.onclick=()=>{$('#ai-result').textContent=JSON.stringify(toolsDefinition,null,2);};link.replaceWith(button);
+    $('#modal-body details').innerHTML='<summary>在线版 AI 接入</summary><p class="muted">可在此粘贴 AI 生成的 JSON 命令，先预览再执行；也可通过浏览器中的 window.roomview 读取和修改场景。在线版不提供 HTTP API 或 MCP 服务，需要这些能力时请从 GitHub 下载并本地运行。</p>';
+  }
   const run=dry=>{try{const raw=JSON.parse($('#ai-commands').value),commands=Array.isArray(raw)?raw:raw.commands;const result=dry?applyCommands(scene,commands):execute(commands);$('#ai-result').textContent=JSON.stringify({dryRun:dry,results:result.results,warnings:analyze(result.scene).warnings},null,2);}catch(e){$('#ai-result').textContent='错误：'+e.message;}};
   $('#ai-validate').onclick=()=>run(true);$('#ai-execute').onclick=()=>run(false);
 }

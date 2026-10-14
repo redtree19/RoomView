@@ -1,6 +1,7 @@
 # Generated files and local project data
 node_modules/
 dist/
+dist-demo/
 data/
 test-results/
 playwright-report/
